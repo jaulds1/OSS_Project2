@@ -43,11 +43,11 @@ int ioctl_set_data(int fd, char * data, char * dev)
     int i;
     char c;
 
-    printf("[+] %s called\n", __FUNCTION__ );
+    //printf("[+] %s called\n", __FUNCTION__ );
 
     ioctl(fd, IOCTL_WRITE_TO_KERNEL, data );
 
-    printf("[+]    Data written to %s: %x\n", dev, data );
+    //printf("[+]    Data written to %s: %x\n", dev, data );
 
     return 0;
 
@@ -58,14 +58,13 @@ int ioctl_read_data(int fd, char * data, char * dev)
     int i;
     char c;
 
-
+    //printf("[+] %s called\n", __FUNCTION__ );
 
     ioctl(fd, IOCTL_READ_FROM_KERNEL, data );
 
     if (NULL != data[0])
     {
-      printf("[+] %s called\n", __FUNCTION__ );
-      printf("[+]    Data read from %s: %x\n", dev, data );
+      //printf("[+]    Data read from %s: %x\n", dev, data );
     }
 
 
@@ -104,7 +103,7 @@ int main( int argc, char ** argv )
 
     if (argc != 2)
     {
-      printf("ERROR: You must enter a device name!\n");
+      printf("\nERROR: You must enter a device name!\n");
       return -1;
     }
 
@@ -130,8 +129,6 @@ int main( int argc, char ** argv )
             return -1;
         }
 
-
-
         char devname_b[32];
         strcpy(devname_b, "/dev/");
         strcat(devname_b, DEVICE_NAME_B );
@@ -145,12 +142,21 @@ int main( int argc, char ** argv )
         }
 
 
+
+
+
+
+
+
+
+
         //init crypto
         initializeEncryption(iv_a, key_a);
 
         strncat(keypair_a, iv_a, IV_SIZE);
         strncat(keypair_a, ":", 1);
         strncat(keypair_a, key_a, KEY_SIZE);
+        //strncat(keypair_a, ":", 1);
 
         //write it to ourselves
         ret = ioctl_set_data(fd_a, keypair_a, dev_a);
@@ -158,7 +164,7 @@ int main( int argc, char ** argv )
         memset(keypair_b, 0, IOCTL_SIZE);
 
         //wait until we can read from other device
-        printf("Will wait up to 60 seconds to receive keypair from user B.\n[");
+        printf("\n\nWill wait up to 60 seconds to receive keypair from user B.\n[");
         while(keypair_b[0] == NULL && wait_count > 0) {
           wait_count -= 1;
           printf("#");
@@ -169,12 +175,37 @@ int main( int argc, char ** argv )
         //if more than 60 seconds then die
         if (0 == wait_count)
         {
-          printf("Error: Did not receive keypair in time. Closing program.\n");
+          printf("]\nError: Did not receive keypair in time. Closing program.\n");
           return -1;
         }
 
+        char * token_iv = strtok(keypair_b, ":");
+        char * token_key = strtok(NULL, ":");
+
+        printf("\nIV READ FROM B contains: ");
+        for (int i=0; i <= strlen(token_iv); i++)
+        {
+          printf("%x", token_iv[i]);
+        }
+
+        printf("\n\nKEY READ FROM B contains: ");
+        for (int i=0; i <= strlen(token_key); i++)
+        {
+          printf("%x", token_key[i]);
+        }
+
         memset(read_from_b, 0, MAX_READ_SIZE);
-        printf("CRYPTO IS DONE");
+        printf("\n\nCRYPTO IS DONE\n\n\n\n");
+
+
+
+
+
+
+
+
+
+
 
 
         //
@@ -235,8 +266,6 @@ int main( int argc, char ** argv )
           return -1;
       }
 
-
-
       char devname_b[32];
       strcpy(devname_b, "/dev/");
       strcat(devname_b, DEVICE_NAME_B );
@@ -249,8 +278,11 @@ int main( int argc, char ** argv )
           return -1;
       }
 
-      //ret = ioctl_set_data(fd_b, keypair_b, dev_b);
-      //ret = ioctl_read_data(fd_a, keypair_a, dev_a);
+
+
+
+
+
 
       //init crypto
       initializeEncryption(iv_b, key_b);
@@ -258,6 +290,7 @@ int main( int argc, char ** argv )
       strncat(keypair_b, iv_b, IV_SIZE);
       strncat(keypair_b, ":", 1);
       strncat(keypair_b, key_b, KEY_SIZE);
+      strncat(keypair_b, ":", 1);
 
       //write it to ourselves
       ret = ioctl_set_data(fd_b, keypair_b, dev_b);
@@ -265,7 +298,7 @@ int main( int argc, char ** argv )
       memset(keypair_a, 0, IOCTL_SIZE);
 
       //wait until we can read from other device
-      printf("Will wait up to 60 seconds to receive keypair from user A.\n[");
+      printf("\n\nWill wait up to 60 seconds to receive keypair from user A.\n[");
       while(keypair_a[0] == NULL && wait_count > 0)
       {
         wait_count -= 1;
@@ -281,9 +314,39 @@ int main( int argc, char ** argv )
         printf("]\nError: Did not receive keypair in time. Closing program.\n");
         return -1;
       }
+
+      char * token_iv = strtok(keypair_a, ":");
+      char * token_key = strtok(NULL, ":");
+
+      printf("\nIV READ FROM A contains: ");
+      for (int i=0; i <= strlen(token_iv); i++)
+      {
+        printf("%x", token_iv[i]);
+      }
+
+      printf("\n\nKEY READ FROM A contains: ");
+      for (int i=0; i <= strlen(token_key); i++)
+      {
+        printf("%x", token_key[i]);
+      }
+
       //if more than 60 seconds then die
       memset(read_from_a, 0, MAX_READ_SIZE);
-      printf("CRYPTO IS DONE");
+      printf("\n\nCRYPTO IS DONE\n\n\n\n");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       while(1)
       {
         int len = 0;
@@ -324,7 +387,7 @@ void initializeEncryption(char * iv, char * key) {
   getrandom_success  = syscall(SYS_getrandom, iv, IV_SIZE, GRND_RANDOM);
   if (getrandom_success != IV_SIZE)
   {
-    printf("ERROR: getrandom() was unsuccessful");
+    printf("\nERROR: getrandom() was unsuccessful\n");
   }
   printf("IV contains: ");
   for (int i=0; i <= IV_SIZE; i++)
@@ -336,7 +399,7 @@ void initializeEncryption(char * iv, char * key) {
   getrandom_success  = syscall(SYS_getrandom, key, KEY_SIZE, GRND_RANDOM);
   if (getrandom_success != KEY_SIZE)
   {
-    printf("ERROR: getrandom() was unsuccessful");
+    printf("\nERROR: getrandom() was unsuccessful\n");
   }
   printf("\n\nKEY contains: ");
   for (int i=0; i <= KEY_SIZE; i++)
