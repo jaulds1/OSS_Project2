@@ -52,7 +52,6 @@ int ioctl_set_data(int fd, char * data, char * dev)
     //printf("[+]    Data written to %s: %x\n", dev, data );
 
     return 0;
-
 }
 
 int ioctl_read_data(int fd, char * data, char * dev)
@@ -69,10 +68,7 @@ int ioctl_read_data(int fd, char * data, char * dev)
       //printf("[+]    Data read from %s: %x\n", dev, data );
     }
 
-
-
     return 0;
-
 }
 
 int main( int argc, char ** argv )
