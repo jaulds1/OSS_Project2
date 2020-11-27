@@ -53,7 +53,7 @@ MODULE_VERSION("1.0.2019");
 
 #define MAX_ALLOWED_LEN 1024
 
-static int    g_majornum;
+static int g_majornum;
 int open_count = 0;
 void * file_a;
 void * file_b;
@@ -100,19 +100,10 @@ static struct file_operations fops =
 static int __init jhu_oss_char_init(void)
 {
   printk("Initialized\n");
-
-
-
    //
    // Register the device dynamically
    //
    g_majornum = register_chrdev(0, DEVICE_NAME, &fops);
-
-
-
-   //g_majornum_b = g_majornum_a;
-
-
 
    if( g_majornum < 0 )
    {
@@ -128,7 +119,6 @@ static int __init jhu_oss_char_init(void)
 
    if( IS_ERR(jhu_oss_class) )
    {
-
       unregister_chrdev(g_majornum, DEVICE_NAME);
 
       printk("[-] Failed to create device class\n");
@@ -212,32 +202,25 @@ static int dev_open(struct inode *inodep, struct file *filep){
    if (!capable( 38))
    // ns_capable(&init_user_ns, 38);
    {
-     printk("[*] IT DONT WORK YO!\n");
+     printk("[*] The usermode program does not have CAP_SECRET_SIXONETWO enabled. Please add this capablility!\n");
      return -EPERM;
    }
 
-   if (0 == open_count || 1 == open_count)
+   if (open_count <= 1)
    {
      int data = 0;
      filep->private_data = data;
      open_count += 1;
      printk("[+] file_a priv_data is: %d", filep->private_data);
    }
-   else if (2 == open_count || 3 == open_count){
+   else if (open_count <= 3){
      int data = 1;
      filep->private_data = data;
      open_count += 1;
      printk("[+] file_b priv_data is: %d", filep->private_data);
    }
 
-
-
-
-
-
-
    printk("[*] Opening the file\n");
-
    return 0;
 }
 
@@ -261,31 +244,27 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
   //error= copy_to_user(buffer, KERNEL_SOURCE, KERNEL_SOURCE_SIZE);
 
   if (filep->private_data == 0) {
-    copy_to_user(buffer, kb_buffer, MAX_ALLOWED_LEN);
-
+    copy_to_user(buffer, kb_buffer, len);
     if (NULL != kb_buffer[0])
     {
       printk("[*] Usermode is requesting %zu chars from kernelmode\n", len);
       printk("\n\n[+] IN READ: file priv_data is: %d", filep->private_data);
       printk("[+]    The message is: %s\n", kb_buffer );
-      memset( kb_buffer, 0, MAX_ALLOWED_LEN );
+      memset( kb_buffer, 0, len );
     }
   }
   else if (filep->private_data == 1){
-    copy_to_user(buffer, ka_buffer, MAX_ALLOWED_LEN);
+    copy_to_user(buffer, ka_buffer, len);
     if (NULL != ka_buffer[0])
     {
       printk("[*] Usermode is requesting %zu chars from kernelmode\n", len);
       printk("\n\n[+] IN READ: file priv_data is: %d", filep->private_data);
       printk("[+]    The message is: %s\n", ka_buffer );
-      memset( ka_buffer, 0, MAX_ALLOWED_LEN );
+      memset( ka_buffer, 0, len );
     }
   }
 
-  size_t num_read;
-  num_read = len;
-
-  return num_read;
+  return len;
 }
 
 //
@@ -298,14 +277,14 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
   printk("\n\n[+] IN WRITE: file priv_data is: %d", filep->private_data);
 
   if (filep->private_data == 0) {
-    memset(ka_buffer, 0, MAX_ALLOWED_LEN);
+    memset(ka_buffer, 0, len);
     copy_from_user(ka_buffer, buffer , len);
     printk("[+]    The length passed in is: %zu\n", len );
     printk("[+]    The message is: %s\n", ka_buffer );
 
   }
   else if (filep->private_data == 1) {
-    memset(kb_buffer, 0, MAX_ALLOWED_LEN);
+    memset(kb_buffer, 0, len);
     copy_from_user(kb_buffer, buffer , len);
     printk("[+]    The length passed in is: %zu\n", len );
     printk("[+]    The message is: %s\n", kb_buffer );
@@ -349,9 +328,6 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
                 printk("[+]    The message is %x\n", ga_buffer );
               }
             }
-
-
-
             break;
 
         case IOCTL_WRITE_TO_KERNEL:
@@ -388,11 +364,6 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
               printk("[+]    The length passed in is %d\n", i );
               printk("[+]    The message is %s\n", gb_buffer );
             }
-
-
-
-
-
             break;
 
         default:
