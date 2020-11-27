@@ -1,1 +1,1 @@
-cmd_/home/ak/Desktop/OSS_Project2/DRIVER/char.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/ak/Desktop/OSS_Project2/DRIVER/char.ko /home/ak/Desktop/OSS_Project2/DRIVER/char.o /home/ak/Desktop/OSS_Project2/DRIVER/char.mod.o ;  true
+cmd_/home/ak/Desktop/OSS_Project2/DRIVER/char.ko := ld -r -m elf_x86_64 -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /home/ak/Desktop/OSS_Project2/DRIVER/char.ko /home/ak/Desktop/OSS_Project2/DRIVER/char.o /home/ak/Desktop/OSS_Project2/DRIVER/char.mod.o ;  true
