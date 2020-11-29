@@ -1,3 +1,3 @@
-/home/ak/Desktop/OSS_Project2/DRIVER/char.ko
-/home/ak/Desktop/OSS_Project2/DRIVER/char.o
+/home/josephaulds/Documents/project2/SKELETON/DRIVER/char.ko
+/home/josephaulds/Documents/project2/SKELETON/DRIVER/char.o
 

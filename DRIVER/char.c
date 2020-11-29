@@ -297,6 +297,7 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
 long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_param)
 {
     int i = 0;
+    int j = 0;
     int error = 0;
     char *temp = NULL;
     char ch;
@@ -315,7 +316,11 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
               {
                 printk("[*]    IOCTL_READ_FROM_KERNEL\n");
                 printk("[*] Usermode is requesting %08x ioctl\n", ioctl_num);
-                printk("[+]    The message is %x\n", gb_buffer );
+                printk("[+]    The message is:\n");
+                for (j=0; j <= i; j++)
+                {
+                  printk("%x", gb_buffer[j]);
+                }
               }
             }
             else if(filep->private_data == 1) {
@@ -325,7 +330,11 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
               {
                 printk("[*]    IOCTL_READ_FROM_KERNEL\n");
                 printk("[*] Usermode is requesting %08x ioctl\n", ioctl_num);
-                printk("[+]    The message is %x\n", ga_buffer );
+                printk("[+]    The message is:\n");
+                for (j=0; j <= i; j++)
+                {
+                  printk("%x", ga_buffer[j]);
+                }
               }
             }
             break;
@@ -346,7 +355,11 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
               error= copy_from_user(ga_buffer, (char*)ioctl_param, i);
 
               printk("[+]    The length passed in is %d\n", i );
-              printk("[+]    The message is %s\n", ga_buffer );
+              printk("[+]    The message is:\n");
+              for (j=0; j <= i; j++)
+              {
+                printk("%x", ga_buffer[j]);
+              }
             }
             else if(filep->private_data == 1) {
               temp = (char *)ioctl_param;
@@ -362,7 +375,11 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
               error= copy_from_user(gb_buffer, (char*)ioctl_param, i);
 
               printk("[+]    The length passed in is %d\n", i );
-              printk("[+]    The message is %s\n", gb_buffer );
+              printk("[+]    The message is:\n");
+              for (j=0; j <= i; j++)
+              {
+                printk("%x", gb_buffer[j]);
+              }
             }
             break;
 

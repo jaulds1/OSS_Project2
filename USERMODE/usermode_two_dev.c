@@ -32,7 +32,7 @@
 #define KEY_SIZE 32
 #define IOCTL_SIZE 49
 
-#define DEBUG 0
+#define DEBUG 1
 
 //Global Variables for crypto
 unsigned char * iv_a;
@@ -397,18 +397,18 @@ int main( int argc, char ** argv )
 
 void initializeEncryption(char * iv, char * key) {
 
-  int getrandom_success;
+  int getrandom_success = 0;
 
   getrandom_success  = syscall(SYS_getrandom, iv, IV_SIZE, GRND_RANDOM);
   if (getrandom_success != IV_SIZE)
   {
-    printf("\nERROR: getrandom() was unsuccessful\n");
+    printf("\nERROR: IV getrandom() was unsuccessful\ngetrandom size: %d\nIV size: %d\n", getrandom_success, IV_SIZE);
   }
 
   getrandom_success  = syscall(SYS_getrandom, key, KEY_SIZE, GRND_RANDOM);
   if (getrandom_success != KEY_SIZE)
   {
-    printf("\nERROR: getrandom() was unsuccessful\n");
+    printf("\nERROR: KEY getrandom() was unsuccessful\ngetrandom size: %d\nKEY size: %d\n", getrandom_success, KEY_SIZE);
   }
 
 
