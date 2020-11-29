@@ -1,0 +1,1 @@
+cmd_/home/josephaulds/Documents/project2/SKELETON/DRIVER/char.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/josephaulds/Documents/project2/SKELETON/DRIVER/char.ko /home/josephaulds/Documents/project2/SKELETON/DRIVER/char.o /home/josephaulds/Documents/project2/SKELETON/DRIVER/char.mod.o ;  true

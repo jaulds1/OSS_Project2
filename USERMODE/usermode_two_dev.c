@@ -32,7 +32,7 @@
 #define KEY_SIZE 32
 #define IOCTL_SIZE 48
 
-#define DEBUG 1
+#define DEBUG 0
 
 //Global Variables for crypto
 unsigned char * iv_a;
@@ -175,17 +175,15 @@ int main( int argc, char ** argv )
           printf("]\nError: Did not receive keypair in time. Closing program.\n");
           return -1;
         }
-        printf("\n IN A, IV_B is:\n");
+        printf("]\n");
         for(int i = 0; i < IV_SIZE; i++) {
           iv_b[i] = keypair_b[i];
           iv_a[i] = keypair_a[i];
-          printf("%x", iv_b[i]);
         }
-        printf("\n IN A, KEY B is:\n");
+
         for(int i = 0; i < KEY_SIZE; i++) {
           key_b[i] = keypair_b[i + IV_SIZE];
           key_a[i] = keypair_a[i + IV_SIZE];
-          printf("%x", key_b[i]);
         }
 
         memset(read_from_b, 0, MAX_READ_SIZE);
@@ -218,7 +216,7 @@ int main( int argc, char ** argv )
         {
           int len = 0;
           memset(write_to_a, 0, MAX_WRITE_SIZE);
-          printf("\n[Me]: ");
+          printf("[Me]: ");
           fgets(write_to_a, MAX_WRITE_SIZE, stdin);
           for (int i = 0; i < MAX_WRITE_SIZE; i++)
           {
@@ -234,7 +232,7 @@ int main( int argc, char ** argv )
           int ciphertext_len = encrypt (write_to_a, strlen ((char *)write_to_a), key_a, iv_a, ciphertext);
 
           write(fd_a, ciphertext, ciphertext_len);
-
+          printf("\nWaiting on input from b...\n");
           while(read_from_b[0] == NULL) {
             read(fd_b, read_from_b, MAX_READ_SIZE);
             sleep(0.25);
@@ -247,7 +245,7 @@ int main( int argc, char ** argv )
           int decryptedtext_len = decrypt(read_from_b, strlen(read_from_b), key_b, iv_b, decryptedtext);
           decryptedtext[decryptedtext_len] = '\0';
 
-          printf("\nRead from [b]: %s", decryptedtext);
+          printf("\nRead from [b]: %s\n", decryptedtext);
           memset(read_from_b, 0, MAX_READ_SIZE);
         }
 
@@ -298,11 +296,6 @@ int main( int argc, char ** argv )
       //init crypto
       initializeEncryption(keypair_b);
 
-      // strncpy(keypair_b, iv_b, IV_SIZE);
-      // //strncat(keypair_b, ":", 1);
-      // strncat(keypair_b, key_b, KEY_SIZE);
-      printf("\nkeypair_b size is: %d\n", sizeof(keypair_b));
-
 
       //write it to ourselves
       ret = ioctl_set_data(fd_b, keypair_b, dev_b);
@@ -316,18 +309,8 @@ int main( int argc, char ** argv )
         wait_count -= 1;
         printf("#");
         fflush(stdout);
-        for (int i=0; i < IOCTL_SIZE; i++)
-        {
-          printf("%x", keypair_b[i]);
-        }
-        printf("\n");
         ret = ioctl_read_data(fd_a, keypair_a, dev_a);
         sleep(1);
-      }
-      printf("\n\n\n\nIN BBBBBB PRINTING KEYPAIR AFTER read loop\n");
-      for (int i=0; i < IOCTL_SIZE; i++)
-      {
-        printf("%x", keypair_b[i]);
       }
       //if more than 60 seconds then die
       if (0 == wait_count)
@@ -335,17 +318,16 @@ int main( int argc, char ** argv )
         printf("]\nError: Did not receive keypair in time. Closing program.\n");
         return -1;
       }
-      printf("\nIN REAL STUFF IV B\n");
+      printf("]");
+
       for(int i = 0; i < IV_SIZE; i++) {
         iv_b[i] = keypair_b[i];
         iv_a[i] = keypair_a[i];
-        printf("%x", keypair_b[i]);
       }
-      printf("\nIN REAL STUFF KEY B\n");
+
       for(int i = 0; i < KEY_SIZE; i++) {
         key_b[i] = keypair_b[i + IV_SIZE];
         key_a[i] = keypair_a[i + IV_SIZE];
-        printf("%x", keypair_b[i +IV_SIZE]);
       }
 
       memset(read_from_a, 0, MAX_READ_SIZE);
@@ -380,6 +362,7 @@ int main( int argc, char ** argv )
       while(1)
       {
         int len = 0;
+        printf("\nWaiting on input from a...\n");
         while(read_from_a[0] == NULL) {
           read(fd_a, read_from_a, MAX_READ_SIZE);
           sleep(0.25);
