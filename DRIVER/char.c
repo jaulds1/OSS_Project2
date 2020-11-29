@@ -52,13 +52,14 @@ MODULE_VERSION("1.0.2019");
 //
 
 #define MAX_ALLOWED_LEN 1024
+#define MAX_IOCTL_LEN 48
 
 static int g_majornum;
 int open_count = 0;
 void * file_a;
 void * file_b;
-static unsigned char ga_buffer[MAX_ALLOWED_LEN] = {0};
-static unsigned char gb_buffer[MAX_ALLOWED_LEN] = {0};
+static unsigned char ga_buffer[MAX_IOCTL_LEN] = {0};
+static unsigned char gb_buffer[MAX_IOCTL_LEN] = {0};
 static char ka_buffer[MAX_ALLOWED_LEN] = {0};
 static char kb_buffer[MAX_ALLOWED_LEN] = {0};
 
@@ -302,7 +303,7 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
     char *temp = NULL;
     char ch;
 
-    int const MAX_IOCTL_LEN = 48;
+
 
 
 
@@ -345,40 +346,40 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
             printk("[*]    IOCTL_WRITE_TO_KERNEL\n");
 
             if(filep->private_data == 0) {
-              temp = (char *)ioctl_param;
-              get_user(ch, temp);
-              for (i = 0; ch && i < MAX_IOCTL_LEN; i++, temp++)
-                  get_user(ch, temp);
+              // temp = (char *)ioctl_param;
+              // get_user(ch, temp);
+              // for (i = 0; ch && i < MAX_IOCTL_LEN; i++, temp++)
+              //     get_user(ch, temp);
 
               //  The code below is not safe..be sure to fix it properly
               //  if you use it
               //
-              memset( ga_buffer, 0, MAX_ALLOWED_LEN );
-              error= copy_from_user(ga_buffer, (char*)ioctl_param, i);
+              memset( ga_buffer, 0, MAX_IOCTL_LEN );
+              error= copy_from_user(ga_buffer, (char*)ioctl_param, MAX_IOCTL_LEN);
 
-              printk("[+]    The length passed in is %d\n", i );
+              printk("[+]    The length passed in is %d\n", MAX_IOCTL_LEN );
               printk("[+]    The message is:\n");
-              for (j=0; j < i; j++)
+              for (j=0; j < MAX_IOCTL_LEN; j++)
               {
                 printk("%x", ga_buffer[j]);
               }
             }
             else if(filep->private_data == 1) {
-              temp = (char *)ioctl_param;
-              get_user(ch, temp);
-              for (i = 0; ch && i < MAX_IOCTL_LEN; i++, temp++)
-                  get_user(ch, temp);
+              // temp = (char *)ioctl_param;
+              // get_user(ch, temp);
+              // for (i = 0; ch && i < MAX_IOCTL_LEN; i++, temp++)
+              //     get_user(ch, temp);
 
               //
               //  The code below is not safe..be sure to fix it properly
               //  if you use it
               //
-              memset( gb_buffer, 0, MAX_ALLOWED_LEN );
-              error= copy_from_user(gb_buffer, (char*)ioctl_param, i);
+              memset( gb_buffer, 0, MAX_IOCTL_LEN );
+              error= copy_from_user(gb_buffer, (char*)ioctl_param, MAX_IOCTL_LEN);
 
-              printk("[+]    The length passed in is %d\n", i );
+              printk("[+]    The length passed in is %d\n", MAX_IOCTL_LEN );
               printk("[+]    The message is:\n");
-              for (j=0; j < i; j++)
+              for (j=0; j < MAX_IOCTL_LEN; j++)
               {
                 printk("%x", gb_buffer[j]);
               }
@@ -403,13 +404,13 @@ static int dev_release(struct inode *inodep, struct file *filep){
    if (filep->private_data == 0)
    {
      memset(ka_buffer, 0, MAX_ALLOWED_LEN);
-     memset(ga_buffer, 0, MAX_ALLOWED_LEN);
+     memset(ga_buffer, 0, MAX_IOCTL_LEN);
      open_count = 0;
    }
    if (filep->private_data == 1)
    {
      memset(kb_buffer, 0, MAX_ALLOWED_LEN);
-     memset(gb_buffer, 0, MAX_ALLOWED_LEN);
+     memset(gb_buffer, 0, MAX_IOCTL_LEN);
      open_count = 2;
    }
    return 0;
