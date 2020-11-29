@@ -314,15 +314,15 @@ int main( int argc, char ** argv )
       while(keypair_a[0] == NULL && wait_count > 0)
       {
         wait_count -= 1;
-        //printf("#");
-        //fflush(stdout);
+        printf("#");
+        fflush(stdout);
         for (int i=0; i < IOCTL_SIZE; i++)
         {
           printf("%x", keypair_b[i]);
         }
         printf("\n");
         ret = ioctl_read_data(fd_a, keypair_a, dev_a);
-        //sleep(1);
+        sleep(1);
       }
       printf("\n\n\n\nIN BBBBBB PRINTING KEYPAIR AFTER read loop\n");
       for (int i=0; i < IOCTL_SIZE; i++)
@@ -335,7 +335,7 @@ int main( int argc, char ** argv )
         printf("]\nError: Did not receive keypair in time. Closing program.\n");
         return -1;
       }
-      printf("IN REAL STUFF IV B\n");
+      printf("\nIN REAL STUFF IV B\n");
       for(int i = 0; i < IV_SIZE; i++) {
         iv_b[i] = keypair_b[i];
         iv_a[i] = keypair_a[i];

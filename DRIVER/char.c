@@ -302,6 +302,8 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
     char *temp = NULL;
     char ch;
 
+    int const MAX_IOCTL_LEN = 48;
+
 
 
     switch (ioctl_num)
@@ -311,7 +313,7 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
 
             if(filep->private_data == 0) {
               temp = (char *)ioctl_param;
-              error= copy_to_user(temp, gb_buffer, MAX_ALLOWED_LEN);
+              error= copy_to_user(temp, gb_buffer, MAX_IOCTL_LEN);
               if (NULL != gb_buffer[0])
               {
                 printk("[*]    IOCTL_READ_FROM_KERNEL\n");
@@ -325,7 +327,7 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
             }
             else if(filep->private_data == 1) {
               temp = (char *)ioctl_param;
-              error= copy_to_user(temp, ga_buffer, MAX_ALLOWED_LEN);
+              error= copy_to_user(temp, ga_buffer, MAX_IOCTL_LEN);
               if (NULL != ga_buffer[0])
               {
                 printk("[*]    IOCTL_READ_FROM_KERNEL\n");
@@ -345,7 +347,7 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
             if(filep->private_data == 0) {
               temp = (char *)ioctl_param;
               get_user(ch, temp);
-              for (i = 0; ch && i < MAX_ALLOWED_LEN; i++, temp++)
+              for (i = 0; ch && i < MAX_IOCTL_LEN; i++, temp++)
                   get_user(ch, temp);
 
               //  The code below is not safe..be sure to fix it properly
@@ -364,7 +366,7 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
             else if(filep->private_data == 1) {
               temp = (char *)ioctl_param;
               get_user(ch, temp);
-              for (i = 0; ch && i < MAX_ALLOWED_LEN; i++, temp++)
+              for (i = 0; ch && i < MAX_IOCTL_LEN; i++, temp++)
                   get_user(ch, temp);
 
               //
