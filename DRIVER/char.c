@@ -201,7 +201,6 @@ static int dev_open(struct inode *inodep, struct file *filep){
 
    //JAULDS1: Checks to ensure the usermode program has the CAP_SECRET_SIXONETWO capbibility set.
    if (!capable( 38))
-    ns_capable(&init_user_ns, 38);
    {
      printk("[*] The usermode program does not have CAP_SECRET_SIXONETWO enabled. Please add this capablility!\n");
      return -EPERM;
