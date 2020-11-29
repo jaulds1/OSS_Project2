@@ -225,6 +225,7 @@ int main( int argc, char ** argv )
           }
 
           unsigned char ciphertext[MAX_WRITE_SIZE];
+          memset(ciphertext, 0, MAX_WRITE_SIZE);
           int ciphertext_len = encrypt (write_to_a, strlen ((char *)write_to_a), key_a, iv_a, ciphertext);
 
           write(fd_a, ciphertext, ciphertext_len);
@@ -236,6 +237,7 @@ int main( int argc, char ** argv )
 
           /* Buffer for the decrypted text */
           unsigned char decryptedtext[MAX_READ_SIZE];
+          memset(decryptedtext, 0, MAX_WRITE_SIZE);
           /* Decrypt the ciphertext */
           int decryptedtext_len = decrypt(read_from_b, strlen(read_from_b), key_b, iv_b, decryptedtext);
           decryptedtext[decryptedtext_len] = '\0';
@@ -365,6 +367,7 @@ int main( int argc, char ** argv )
 
         /* Buffer for the decrypted text */
         unsigned char decryptedtext[MAX_READ_SIZE];
+        memset(decryptedtext, 0, MAX_WRITE_SIZE);
         /* Decrypt the ciphertext */
         int decryptedtext_len = decrypt(read_from_a, strlen(read_from_a), key_a, iv_a, decryptedtext);
         decryptedtext[decryptedtext_len] = '\0';
@@ -385,6 +388,7 @@ int main( int argc, char ** argv )
         }
 
         unsigned char ciphertext[MAX_WRITE_SIZE];
+        memset(ciphertext, 0, MAX_WRITE_SIZE);
         int ciphertext_len = encrypt (write_to_b, strlen ((char *)write_to_b), key_b, iv_b, ciphertext);
 
         write(fd_b, ciphertext, ciphertext_len);
