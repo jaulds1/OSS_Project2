@@ -317,7 +317,7 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
                 printk("[*]    IOCTL_READ_FROM_KERNEL\n");
                 printk("[*] Usermode is requesting %08x ioctl\n", ioctl_num);
                 printk("[+]    The message is:\n");
-                for (j=0; j <= i; j++)
+                for (j=0; j < i; j++)
                 {
                   printk("%x", gb_buffer[j]);
                 }
@@ -331,7 +331,7 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
                 printk("[*]    IOCTL_READ_FROM_KERNEL\n");
                 printk("[*] Usermode is requesting %08x ioctl\n", ioctl_num);
                 printk("[+]    The message is:\n");
-                for (j=0; j <= i; j++)
+                for (j=0; j < i; j++)
                 {
                   printk("%x", ga_buffer[j]);
                 }
@@ -356,7 +356,7 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
 
               printk("[+]    The length passed in is %d\n", i );
               printk("[+]    The message is:\n");
-              for (j=0; j <= i; j++)
+              for (j=0; j < i; j++)
               {
                 printk("%x", ga_buffer[j]);
               }
@@ -376,7 +376,7 @@ long dev_ioctl(struct file *filep, unsigned int ioctl_num, unsigned long ioctl_p
 
               printk("[+]    The length passed in is %d\n", i );
               printk("[+]    The message is:\n");
-              for (j=0; j <= i; j++)
+              for (j=0; j < i; j++)
               {
                 printk("%x", gb_buffer[j]);
               }

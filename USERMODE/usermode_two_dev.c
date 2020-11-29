@@ -149,12 +149,12 @@ int main( int argc, char ** argv )
 
 
         //init crypto
-        initializeEncryption(iv_a, key_a);
+        initializeEncryption(keypair_a);
 
-        strncpy(keypair_a, iv_a, IV_SIZE);
-        //strncat(keypair_a, ":", 1);
-        strncat(keypair_a, key_a, KEY_SIZE);
-        printf("keypair_a size is: %d\n", sizeof(keypair_a));
+        // strncpy(keypair_a, iv_a, IV_SIZE);
+        // //strncat(keypair_a, ":", 1);
+        // strncat(keypair_a, key_a, KEY_SIZE);
+        // printf("keypair_a size is: %d\n", sizeof(keypair_a));
         //write it to ourselves
         ret = ioctl_set_data(fd_a, keypair_a, dev_a);
 
@@ -175,12 +175,17 @@ int main( int argc, char ** argv )
           printf("]\nError: Did not receive keypair in time. Closing program.\n");
           return -1;
         }
-
+        printf("\n IN A, IV_B is:\n");
         for(int i = 0; i < IV_SIZE; i++) {
           iv_b[i] = keypair_b[i];
+          iv_a[i] = keypair_a[i];
+          printf("%x", iv_b[i]);
         }
+        printf("\n IN A, KEY B is:\n");
         for(int i = 0; i < KEY_SIZE; i++) {
           key_b[i] = keypair_b[i + IV_SIZE];
+          key_a[i] = keypair_a[i + IV_SIZE];
+          printf("%x", key_b[i]);
         }
 
         memset(read_from_b, 0, MAX_READ_SIZE);
@@ -188,13 +193,13 @@ int main( int argc, char ** argv )
 
         if(DEBUG) {
           printf("\nIV READ FROM B contains: ");
-          for (int i=0; i <= strlen(iv_b); i++)
+          for (int i=0; i < IV_SIZE; i++)
           {
             printf("%x", iv_b[i]);
           }
 
           printf("\n\nKEY READ FROM B contains: ");
-          for (int i=0; i <= strlen(key_b); i++)
+          for (int i=0; i < KEY_SIZE; i++)
           {
             printf("%x", key_b[i]);
           }
@@ -291,12 +296,13 @@ int main( int argc, char ** argv )
 
 
       //init crypto
-      initializeEncryption(iv_b, key_b);
+      initializeEncryption(keypair_b);
 
-      strncpy(keypair_b, iv_b, IV_SIZE);
-      //strncat(keypair_b, ":", 1);
-      strncat(keypair_b, key_b, KEY_SIZE);
-      printf("keypair_b size is: %d\n", sizeof(keypair_b));
+      // strncpy(keypair_b, iv_b, IV_SIZE);
+      // //strncat(keypair_b, ":", 1);
+      // strncat(keypair_b, key_b, KEY_SIZE);
+      printf("\nkeypair_b size is: %d\n", sizeof(keypair_b));
+
 
       //write it to ourselves
       ret = ioctl_set_data(fd_b, keypair_b, dev_b);
@@ -308,24 +314,38 @@ int main( int argc, char ** argv )
       while(keypair_a[0] == NULL && wait_count > 0)
       {
         wait_count -= 1;
-        printf("#");
-        fflush(stdout);
+        //printf("#");
+        //fflush(stdout);
+        for (int i=0; i < IOCTL_SIZE; i++)
+        {
+          printf("%x", keypair_b[i]);
+        }
+        printf("\n");
         ret = ioctl_read_data(fd_a, keypair_a, dev_a);
-        sleep(1);
+        //sleep(1);
       }
-
+      printf("\n\n\n\nIN BBBBBB PRINTING KEYPAIR AFTER read loop\n");
+      for (int i=0; i < IOCTL_SIZE; i++)
+      {
+        printf("%x", keypair_b[i]);
+      }
       //if more than 60 seconds then die
       if (0 == wait_count)
       {
         printf("]\nError: Did not receive keypair in time. Closing program.\n");
         return -1;
       }
-
+      printf("IN REAL STUFF IV B\n");
       for(int i = 0; i < IV_SIZE; i++) {
+        iv_b[i] = keypair_b[i];
         iv_a[i] = keypair_a[i];
+        printf("%x", keypair_b[i]);
       }
-      for(int i = 0; i < IV_SIZE + KEY_SIZE; i++) {
+      printf("\nIN REAL STUFF KEY B\n");
+      for(int i = 0; i < KEY_SIZE; i++) {
+        key_b[i] = keypair_b[i + IV_SIZE];
         key_a[i] = keypair_a[i + IV_SIZE];
+        printf("%x", keypair_b[i +IV_SIZE]);
       }
 
       memset(read_from_a, 0, MAX_READ_SIZE);
@@ -334,13 +354,13 @@ int main( int argc, char ** argv )
 
       if(DEBUG) {
         printf("\nIV READ FROM A contains: ");
-        for (int i=0; i <= strlen(iv_a); i++)
+        for (int i=0; i < IV_SIZE; i++)
         {
           printf("%x", iv_a[i]);
         }
 
         printf("\n\nKEY READ FROM A contains: ");
-        for (int i=0; i <= strlen(key_a); i++)
+        for (int i=0; i < KEY_SIZE; i++)
         {
           printf("%x", key_a[i]);
         }
@@ -400,43 +420,40 @@ int main( int argc, char ** argv )
     return 0;
 }
 
-void initializeEncryption(unsigned char * iv, unsigned char * key) {
-
+void initializeEncryption(unsigned char * keypair) {
   int getrandom_success = 0;
-  while (getrandom_success != IV_SIZE)
+  while (getrandom_success != (IOCTL_SIZE))
   {
-    getrandom_success  = syscall(SYS_getrandom, iv, IV_SIZE, GRND_RANDOM);
-    if (getrandom_success != IV_SIZE)
+    getrandom_success  = syscall(SYS_getrandom, keypair, IOCTL_SIZE, GRND_RANDOM);
+    if (getrandom_success != (IOCTL_SIZE))
     {
-      printf("\nERROR: IV getrandom() was unsuccessful\ngetrandom size: %d\nIV size: %d\n", getrandom_success, IV_SIZE);
+      printf("\nERROR: getrandom() was unsuccessful\n");
       printf("Will wait 15 seconds before trying again... please move the mouse during the wait to increase entropy.\n\n");
       sleep(15);
     }
   }
-  getrandom_success = 0;
-  while (getrandom_success != KEY_SIZE)
-  {
-    getrandom_success  = syscall(SYS_getrandom, key, KEY_SIZE, GRND_RANDOM);
-    if (getrandom_success != KEY_SIZE)
-    {
-      printf("\nERROR: KEY getrandom() was unsuccessful\ngetrandom size: %d\nKEY size: %d\n", getrandom_success, KEY_SIZE);
-      printf("Will wait 15 seconds before trying again... please move the mouse during the wait to increase entropy.\n\n");
-      sleep(15);
-    }
-  }
+
+
+
+
 
 
   if(DEBUG) {
-    printf("IV contains: ");
-    for (int i=0; i <= IV_SIZE; i++)
+    printf("Keypair contains: ");
+    for (int i=0; i < IOCTL_SIZE; i++)
     {
-      printf("%x", iv[i]);
+      printf("%x", keypair[i]);
+    }
+    printf("IV contains: ");
+    for (int i=0; i < IV_SIZE; i++)
+    {
+      printf("%x", keypair[i]);
     }
 
     printf("\n\nKEY contains: ");
-    for (int i=0; i <= KEY_SIZE; i++)
+    for (int i=0; i < KEY_SIZE; i++)
     {
-      printf("%x", key[i]);
+      printf("%x", keypair[i + IV_SIZE]);
     }
   }
 }
