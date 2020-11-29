@@ -395,20 +395,27 @@ int main( int argc, char ** argv )
     return 0;
 }
 
-void initializeEncryption(char * iv, char * key) {
+void initializeEncryption(unsigned char * iv, unsigned char * key) {
 
   int getrandom_success = 0;
-
-  getrandom_success  = syscall(SYS_getrandom, iv, IV_SIZE, GRND_RANDOM);
-  if (getrandom_success != IV_SIZE)
+  while (getrandom_success != IV_SIZE)
   {
-    printf("\nERROR: IV getrandom() was unsuccessful\ngetrandom size: %d\nIV size: %d\n", getrandom_success, IV_SIZE);
+    getrandom_success  = syscall(SYS_getrandom, iv, IV_SIZE, GRND_RANDOM);
+    if (getrandom_success != IV_SIZE)
+    {
+      printf("\nERROR: IV getrandom() was unsuccessful\ngetrandom size: %d\nIV size: %d\n", getrandom_success, IV_SIZE);
+      sleep(15);
+    }
   }
-
-  getrandom_success  = syscall(SYS_getrandom, key, KEY_SIZE, GRND_RANDOM);
-  if (getrandom_success != KEY_SIZE)
+  getrandom_success = 0;
+  while (getrandom_success != KEY_SIZE)
   {
-    printf("\nERROR: KEY getrandom() was unsuccessful\ngetrandom size: %d\nKEY size: %d\n", getrandom_success, KEY_SIZE);
+    getrandom_success  = syscall(SYS_getrandom, key, KEY_SIZE, GRND_RANDOM);
+    if (getrandom_success != KEY_SIZE)
+    {
+      printf("\nERROR: KEY getrandom() was unsuccessful\ngetrandom size: %d\nKEY size: %d\n", getrandom_success, KEY_SIZE);
+      sleep(15);
+    }
   }
 
 
