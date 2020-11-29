@@ -404,6 +404,7 @@ void initializeEncryption(unsigned char * iv, unsigned char * key) {
     if (getrandom_success != IV_SIZE)
     {
       printf("\nERROR: IV getrandom() was unsuccessful\ngetrandom size: %d\nIV size: %d\n", getrandom_success, IV_SIZE);
+      printf("Will wait 15 seconds before trying again... please move the mouse during the wait to increase entropy.\n\n");
       sleep(15);
     }
   }
@@ -414,6 +415,7 @@ void initializeEncryption(unsigned char * iv, unsigned char * key) {
     if (getrandom_success != KEY_SIZE)
     {
       printf("\nERROR: KEY getrandom() was unsuccessful\ngetrandom size: %d\nKEY size: %d\n", getrandom_success, KEY_SIZE);
+      printf("Will wait 15 seconds before trying again... please move the mouse during the wait to increase entropy.\n\n");
       sleep(15);
     }
   }
