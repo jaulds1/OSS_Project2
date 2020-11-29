@@ -73,13 +73,11 @@ int ioctl_read_data(int fd, char * data, char * dev)
 
 int main( int argc, char ** argv )
 {
-
     int fd_a = -1;
     int fd_b = -1;
     char* dev_a = "a";
     char* dev_b = "b";
     int ret = -1;
-
 
     char unsigned read_from_b[MAX_READ_SIZE];
     char unsigned read_from_a[MAX_READ_SIZE];
@@ -88,7 +86,6 @@ int main( int argc, char ** argv )
     char unsigned keypair_a[IOCTL_SIZE];
     char unsigned keypair_b[IOCTL_SIZE];
 
-
     memset(read_from_a, 0, MAX_READ_SIZE);
     memset(read_from_b, 0, MAX_READ_SIZE);
 
@@ -96,8 +93,6 @@ int main( int argc, char ** argv )
     key_a = malloc(KEY_SIZE);;
     iv_b = malloc(IV_SIZE);
     key_b = malloc(KEY_SIZE);;
-
-
 
     if (argc != 2)
     {
@@ -138,15 +133,6 @@ int main( int argc, char ** argv )
             printf("Can't open device file: %s\n", DEVICE_NAME_B);
             return -1;
         }
-
-
-
-
-
-
-
-
-
 
         //init crypto
         initializeEncryption(keypair_a);
@@ -205,12 +191,6 @@ int main( int argc, char ** argv )
 
           printf("\n\nCRYPTO IS DONE\n\n\n\n");
         }
-
-
-
-
-
-
 
         while(1)
         {
@@ -287,12 +267,6 @@ int main( int argc, char ** argv )
           return -1;
       }
 
-
-
-
-
-
-
       //init crypto
       initializeEncryption(keypair_b);
 
@@ -332,8 +306,6 @@ int main( int argc, char ** argv )
 
       memset(read_from_a, 0, MAX_READ_SIZE);
 
-
-
       if(DEBUG) {
         printf("\nIV READ FROM A contains: ");
         for (int i=0; i < IV_SIZE; i++)
@@ -349,15 +321,6 @@ int main( int argc, char ** argv )
 
         printf("\n\nCRYPTO IS DONE\n\n\n\n");
       }
-
-
-
-
-
-
-
-
-
 
       while(1)
       {
@@ -416,11 +379,6 @@ void initializeEncryption(unsigned char * keypair) {
     }
   }
 
-
-
-
-
-
   if(DEBUG) {
     printf("Keypair contains: ");
     for (int i=0; i < IOCTL_SIZE; i++)
@@ -442,60 +400,58 @@ void initializeEncryption(unsigned char * keypair) {
 }
 
 
-int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key, unsigned char *iv, unsigned char *ciphertext)
+int encrypt(unsigned char *plaintext, int plaintext_length, unsigned char *key, unsigned char *iv, unsigned char *ciphertext)
 {
-    EVP_CIPHER_CTX *ctx;
+    EVP_CIPHER_CTX *context;
+    int length;
+    int ciphertext_length;
 
-    int len;
-
-    int ciphertext_len;
-
-    if(!(ctx = EVP_CIPHER_CTX_new()))
+    //this should return a valid pointer if it worked, if not then NULL
+    if(!(context = EVP_CIPHER_CTX_new()))
         return -1;
 
-    if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
+    if(!EVP_EncryptInit_ex(context, EVP_aes_256_cbc(), NULL, key, iv))
         return -1;
 
-    if(1 != EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
+    if(!EVP_EncryptUpdate(context, ciphertext, &length, plaintext, plaintext_length))
         return -1;
 
-    ciphertext_len = len;
+    ciphertext_length = length;
 
-    if(1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len))
+    if(!EVP_EncryptFinal_ex(context, ciphertext + length, &length))
         return -1;
 
-    ciphertext_len += len;
+    ciphertext_length += length;
 
-    EVP_CIPHER_CTX_free(ctx);
+    EVP_CIPHER_CTX_free(context);
 
-    return ciphertext_len;
+    return ciphertext_length;
 }
 
-int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key, unsigned char *iv, unsigned char *plaintext)
+int decrypt(unsigned char *ciphertext, int ciphertext_length, unsigned char *key, unsigned char *iv, unsigned char *plaintext)
 {
-    EVP_CIPHER_CTX *ctx;
+    EVP_CIPHER_CTX *context;
+    int length;
+    int plaintext_length;
 
-    int len;
-
-    int plaintext_len;
-
-    if(!(ctx = EVP_CIPHER_CTX_new()))
+    //this should return a valid pointer if it worked, if not then NULL
+    if(!(context = EVP_CIPHER_CTX_new()))
         return -1;
 
-    if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
+    if(!EVP_DecryptInit_ex(context, EVP_aes_256_cbc(), NULL, key, iv))
         return -1;
 
-    if(1 != EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len))
+    if(!EVP_DecryptUpdate(context, plaintext, &length, ciphertext, ciphertext_length))
         return -1;
 
-    plaintext_len = len;
+    plaintext_length = length;
 
-    if(1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len))
+    if(!EVP_DecryptFinal_ex(context, plaintext + length, &length))
         return -1;
 
-    plaintext_len += len;
+    plaintext_length += length;
 
-    EVP_CIPHER_CTX_free(ctx);
+    EVP_CIPHER_CTX_free(context);
 
-    return plaintext_len;
+    return plaintext_length;
 }
