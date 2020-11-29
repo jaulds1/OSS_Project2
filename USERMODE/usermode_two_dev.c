@@ -30,7 +30,7 @@
 #define MAX_WRITE_SIZE 1024
 #define IV_SIZE 16
 #define KEY_SIZE 32
-#define IOCTL_SIZE 49
+#define IOCTL_SIZE 48
 
 #define DEBUG 1
 
@@ -151,10 +151,10 @@ int main( int argc, char ** argv )
         //init crypto
         initializeEncryption(iv_a, key_a);
 
-        strncat(keypair_a, iv_a, IV_SIZE);
+        strncpy(keypair_a, iv_a, IV_SIZE);
         //strncat(keypair_a, ":", 1);
         strncat(keypair_a, key_a, KEY_SIZE);
-
+        printf("keypair_a size is: %d\n", sizeof(keypair_a));
         //write it to ourselves
         ret = ioctl_set_data(fd_a, keypair_a, dev_a);
 
@@ -291,9 +291,10 @@ int main( int argc, char ** argv )
       //init crypto
       initializeEncryption(iv_b, key_b);
 
-      strncat(keypair_b, iv_b, IV_SIZE);
+      strncpy(keypair_b, iv_b, IV_SIZE);
       //strncat(keypair_b, ":", 1);
       strncat(keypair_b, key_b, KEY_SIZE);
+      printf("keypair_b size is: %d\n", sizeof(keypair_b));
 
       //write it to ourselves
       ret = ioctl_set_data(fd_b, keypair_b, dev_b);
