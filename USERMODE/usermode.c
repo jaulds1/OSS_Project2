@@ -138,11 +138,6 @@ int main( int argc, char ** argv )
         //init crypto
         initializeEncryption(keypair_a);
 
-        // strncpy(keypair_a, iv_a, IV_SIZE);
-        // //strncat(keypair_a, ":", 1);
-        // strncat(keypair_a, key_a, KEY_SIZE);
-        // printf("keypair_a size is: %d\n", sizeof(keypair_a));
-        //write it to ourselves
         ret = ioctl_set_data(fd_a, keypair_a, dev_a);
 
         memset(keypair_b, 0, IOCTL_SIZE);
@@ -197,7 +192,7 @@ int main( int argc, char ** argv )
         {
           int len = 0;
           memset(write_to_a, 0, MAX_WRITE_SIZE);
-          printf("\n\n\n\n[Me]: ");
+          printf("[Me]: ");
           fgets(write_to_a, MAX_WRITE_SIZE, stdin);
           for (int i = 0; i < MAX_WRITE_SIZE; i++)
           {
@@ -210,50 +205,24 @@ int main( int argc, char ** argv )
 
 
 
-
           unsigned char ciphertext[MAX_WRITE_SIZE];
 
           memset(ciphertext, 0, MAX_WRITE_SIZE);
           int ciphertext_len = encrypt (write_to_a, strlen ((char *)write_to_a), key_a, iv_a, ciphertext);
 
-          /* Do something useful with the ciphertext here */
-          printf("Ciphertext length is: %d\n", ciphertext_len);
-          printf("Ciphertext is:\n");
-          BIO_dump_fp (stdout, (const char *)ciphertext, ciphertext_len);
-
           char buffForLength[5] = {0};
           snprintf(buffForLength, sizeof(buffForLength), "%04d", ciphertext_len);
-
-          //printf("\nCONTENT OF BUFFER THAT HOLDS ciphertext_len: %s\n", buffForLength);
-
-          //unsigned char lengthCipherText[16];
-          //int lengthCipherText_len = encrypt(buffForLength, strlen(buffForLength), key_a, iv_a, lengthCipherText);
-
-          //printf("\nTHIS HERE HERE: %d\n", lengthCipherText_len);
 
           char resultToSend[MAX_WRITE_SIZE] = {0};
 
           memcpy(&resultToSend, buffForLength, 4);
           memcpy(&resultToSend[4], ciphertext, MAX_WRITE_SIZE - 4);
-          //strncpy(resultToSend, buffForLength, 4);
-          //strncat(resultToSend, ciphertext, MAX_WRITE_SIZE - 4); //4 becuase new line gets taken away during strncat
-
-          //printf("\nRAW LENGTH: %d", strlen(write_to_a));
-          //printf("\nCIPHERTEXT LENGTH: %d\n", ciphertext_len);
-          //printf("\nCiphertext Message (preconcatinated): %s\n", ciphertext);
-          printf("MESSAGE SENT:\n");
-          BIO_dump_fp (stdout, (const char *)resultToSend, 1024);
-        //  printf("\nMESSAGE SENT: %s\n", resultToSend);
 
           write(fd_a, resultToSend, MAX_WRITE_SIZE); //4 becuase new line gets taken away during strncat
 
           memset(resultToSend, 0, MAX_WRITE_SIZE);
 
-
-
-
-
-          printf("\n\n\n\n\nWaiting on input from b...\n");
+          printf("\nWaiting on input from b...\n");
           while(read_from_b[0] == NULL) {
             read(fd_b, read_from_b, MAX_READ_SIZE);
             sleep(0.25);
@@ -261,46 +230,20 @@ int main( int argc, char ** argv )
 
           char sizeCiphertextString[4] = {0};
           strncpy(sizeCiphertextString, read_from_b, 4);
-          //printf("\nOMG LOOK HERE: %s\n", sizeCiphertextString);
 
           int sizeCiphertext = atoi(sizeCiphertextString);
-          //printf("\nI HOPE THIS WORKS: %d\n", sizeCiphertext);
-
-
-          printf("Ciphertext before memcpy (raw read_from_b):\n");
-          BIO_dump_fp (stdout, (const char *)read_from_b, 1024);
-
-
-
 
           char middleMan[MAX_READ_SIZE - 4] = {0};
 
-          //printf("\nMIDDLE MAN RIGHT AFTER CREATION: %s\n", middleMan);
-          //WHAT IS THIS
-          //strncpy(middleMan, &read_from_b[4], 1);
-          printf("sizeCiphertext: %d\n", sizeCiphertext);
           memcpy(&middleMan[0], &read_from_b[4], sizeCiphertext);
-          //printf("\nFIRST CHAR: %s\n", middleMan);
-          //WHAT IS THIS
-          //strncat(middleMan, &read_from_b[5], sizeCiphertext - 1);
 
-          //printf("\nMIDDLE MAN AFTER FILLING: %s\n", middleMan);
-
-          /* Do something useful with the ciphertext here */
-          printf("Ciphertext after memcpy is (middleMan):\n");
-          BIO_dump_fp (stdout, (const char *)middleMan, sizeCiphertext);
-
-          /* Buffer for the decrypted text */
           unsigned char decryptedtext[MAX_READ_SIZE];
           memset(decryptedtext, 0, MAX_WRITE_SIZE);
-          /* Decrypt the ciphertext */
-          //int decryptedtext_len = decrypt(read_from_b, strlen(read_from_b), key_b, iv_b, decryptedtext);
+
           int decryptedtext_len = decrypt(middleMan, sizeCiphertext, key_b, iv_b, decryptedtext);
           decryptedtext[decryptedtext_len] = '\0';
           memset(middleMan, 0, MAX_READ_SIZE);
 
-          //printf("\nENCRYPTED LENGTH: %d", strlen(read_from_b));
-          //printf("\nDECRYPTED LENGTH: %d\n", decryptedtext_len);
           printf("\nRead from [b]: %s\n", decryptedtext);
           memset(read_from_b, 0, MAX_READ_SIZE);
         }
@@ -412,7 +355,7 @@ int main( int argc, char ** argv )
       while(1)
       {
         int len = 0;
-        printf("\n\n\n\n\nWaiting on input from a...\n");
+        printf("\nWaiting on input from a...\n");
         while(read_from_a[0] == NULL) {
           read(fd_a, read_from_a, MAX_READ_SIZE);
           sleep(0.25);
@@ -420,58 +363,27 @@ int main( int argc, char ** argv )
 
         char sizeCiphertextString[4] = {0};
         strncpy(sizeCiphertextString, read_from_a, 4);
-        //printf("\nOMG LOOK HERE: %s\n", sizeCiphertextString);
 
         int sizeCiphertext = atoi(sizeCiphertextString);
-        //printf("\nI HOPE THIS WORKS: %d\n", sizeCiphertext);
-
-
-        printf("Ciphertext before memcpy (raw read_from_a):\n");
-        BIO_dump_fp (stdout, (const char *)read_from_a, 1024);
 
         char middleMan[MAX_READ_SIZE - 4] = {0};
 
-        //strncpy(middleMan, &read_from_a[4], 1);
-
-        //printf("\nFIRST CHAR: %s\n", middleMan);
-        printf("sizeCiphertext: %d\n", sizeCiphertext);
         memcpy(&middleMan, &read_from_a[4], sizeCiphertext);
-        //strncat(middleMan, &read_from_a[5], sizeCiphertext - 1);
-        //printf("\nMIDDLE MAN: %s\n", middleMan);
 
-
-        /* Do something useful with the ciphertext here */
-        printf("Ciphertext after memcpy is (middleMan):\n");
-        BIO_dump_fp (stdout, (const char *)middleMan, 1024);
 
         /* Buffer for the decrypted text */
         unsigned char decryptedtext[MAX_READ_SIZE];
         memset(decryptedtext, 0, MAX_READ_SIZE);
 
-        /* Decrypt the ciphertext */
-        //printf("\nENCRYPTED LENGTH BEFORE DECRYPTION: %d", strlen(read_from_a));
         int decryptedtext_len = decrypt(middleMan, sizeCiphertext, key_a, iv_a, decryptedtext);
         decryptedtext[decryptedtext_len] = '\0';
         memset(middleMan, 0, MAX_READ_SIZE);
 
-        //printf("\nENCRYPTED LENGTH: %d", strlen(read_from_a));
-        //printf("\nDECRYPTED LENGTH: %d\n", decryptedtext_len);
         printf("\nRead from [a]: %s\n", decryptedtext);
-
-
-
-
-
-
-
-
-
-
-
 
         memset(read_from_a, 0, MAX_READ_SIZE);
         memset(write_to_b, 0, MAX_WRITE_SIZE);
-        printf("\n\n\n\n[Me]: ");
+        printf("[Me]: ");
         fgets(write_to_b, MAX_WRITE_SIZE, stdin);
         for (int i = 0; i < MAX_WRITE_SIZE; i++)
         {
@@ -482,64 +394,23 @@ int main( int argc, char ** argv )
           }
         }
 
-
-
-
-
-
         unsigned char ciphertext[MAX_WRITE_SIZE];
 
         memset(ciphertext, 0, MAX_WRITE_SIZE);
         int ciphertext_len = encrypt (write_to_b, strlen ((char *)write_to_b), key_b, iv_b, ciphertext);
 
-        /* Do something useful with the ciphertext here */
-        printf("Ciphertext length is: %d\n", ciphertext_len);
-        printf("Ciphertext is:\n");
-        BIO_dump_fp (stdout, (const char *)ciphertext, ciphertext_len);
-
         char buffForLength[5] = {0};
         snprintf(buffForLength, sizeof(buffForLength), "%04d", ciphertext_len);
 
-        //printf("\nCONTENT OF BUFFER THAT HOLDS ciphertext_len: %s\n", buffForLength);
-
-        //unsigned char lengthCipherText[16];
-        //int lengthCipherText_len = encrypt(buffForLength, strlen(buffForLength), key_a, iv_a, lengthCipherText);
-
-        //printf("\nTHIS HERE HERE: %d\n", lengthCipherText_len);
 
         char resultToSend[MAX_WRITE_SIZE] = {0};
 
         memcpy(&resultToSend, buffForLength, 4);
         memcpy(&resultToSend[4], ciphertext, MAX_WRITE_SIZE - 4);
-        //strncpy(resultToSend, buffForLength, 4);
-        //strncpy(&resultToSend[4], ciphertext, MAX_WRITE_SIZE - 4); //4 becuase new line gets taken away during strncat
-
-        //printf("\nRAW LENGTH: %d", strlen(write_to_b));
-        //printf("\nCIPHERTEXT LENGTH: %d\n", ciphertext_len);
-        //printf("\nMESSAGE SENT: %s\n", resultToSend);
-        printf("MESSAGE SENT:\n");
-        BIO_dump_fp (stdout, (const char *)resultToSend, 1024);
 
         write(fd_b, resultToSend, MAX_WRITE_SIZE); //4 becuase new line gets taken away during strncat
 
         memset(resultToSend, 0, MAX_WRITE_SIZE);
-
-
-
-
-
-
-
-
-
-/*  The old stuff
-        unsigned char ciphertext[MAX_WRITE_SIZE];
-        memset(ciphertext, 0, MAX_WRITE_SIZE);
-        int ciphertext_len = encrypt (write_to_b, strlen ((char *)write_to_b), key_b, iv_b, ciphertext);
-        printf("\nRAW LENGTH: %d", strlen(write_to_b));
-        printf("\nCIPHERTEXT LENGTH: %d\n", ciphertext_len);
-
-        write(fd_b, ciphertext, ciphertext_len);*/
       }
 
       close(fd_a);
